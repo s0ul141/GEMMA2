@@ -7,14 +7,13 @@ import torch
 def load_model():
     model_name = "s0uL141/fine_tuned_science_gemma2b-it"  # Replace with your Hugging Face repo or local path
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16)
+    model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
     return tokenizer, model
 
 # Load the model and tokenizer
 tokenizer, model = load_model()
-
 # Function to generate text based on the user prompt
-def generate_response(prompt, max_length=20):
+def generate_response(prompt, max_length=5):
     # Tokenize input prompt
     inputs = tokenizer(prompt, return_tensors="pt")
     # Generate response using the model
