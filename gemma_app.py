@@ -13,7 +13,7 @@ def load_model():
 # Load the model and tokenizer
 tokenizer, model = load_model()
 # Function to generate text based on the user prompt
-def generate_response(prompt, max_length=5):
+def generate_response(prompt, max_length=100):
     # Tokenize input prompt
     inputs = tokenizer(prompt, return_tensors="pt")
     # Generate response using the model
@@ -28,7 +28,7 @@ def main():
     st.write("This app generates responses based on your input using a fine-tuned version of the Gemma 2b-it model.")
 
     # Text input area for the user to provide a prompt
-    user_input = st.text_area("Enter your prompt here:", height=200)
+    user_input = st.text_area("Enter your prompt here:", height=100)
 
     # Button to trigger text generation
     if st.button("Generate Response"):
