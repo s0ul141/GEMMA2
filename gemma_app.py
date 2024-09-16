@@ -5,7 +5,7 @@ import torch
 # Cache the model loading to avoid reloading it on every interaction
 @st.cache_resource
 def load_model():
-    model_name = "your-username/fine_tuned_science_gemma2b-it"  # Replace with your Hugging Face repo or local path
+    model_name = "s0uL141/fine_tuned_science_gemma2b-it"  # Replace with your Hugging Face repo or local path
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16)
     return tokenizer, model
