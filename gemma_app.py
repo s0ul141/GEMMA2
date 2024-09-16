@@ -13,11 +13,11 @@ def load_model():
 # Load the model and tokenizer
 tokenizer, model = load_model()
 # Function to generate text based on the user prompt
-def generate_response(prompt, max_length=100):
+def generate_response(prompt, max_length=1000):
     # Tokenize input prompt
     inputs = tokenizer(prompt, return_tensors="pt")
     # Generate response using the model
-    output = model.generate(inputs.input_ids, max_length=max_length, num_return_sequences=1)
+    output = model.generate(inputs.input_ids, min_length=100, max_length=max_length, num_return_sequences=1)
     # Decode the response and return
     return tokenizer.decode(output[0], skip_special_tokens=True)
 
