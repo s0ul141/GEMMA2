@@ -14,7 +14,7 @@ def load_model():
 tokenizer, model = load_model()
 
 # Function to generate text based on the user prompt
-def generate_response(prompt, max_length=200):
+def generate_response(prompt, max_length=20):
     # Tokenize input prompt
     inputs = tokenizer(prompt, return_tensors="pt")
     # Generate response using the model
