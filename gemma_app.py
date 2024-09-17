@@ -1,13 +1,15 @@
 import streamlit as st
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 import torch
+
 
 # Cache the model loading to avoid reloading it on every interaction
 @st.cache_resource
 def load_model():
     model_name = "s0uL141/fine_tuned_science_gemma2b-it"  # Replace with your Hugging Face repo or local path
+    bnb_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type = "nf4", bnb_4bit_compute_dtype = torch.bfloat16)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
+    model = AutoModelForCausalLM.from_pretrained(model_name, quantization_config = bnb_congif, device_map={"":0})
     return tokenizer, model
 
 # Load the model and tokenizer
