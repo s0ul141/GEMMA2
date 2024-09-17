@@ -11,17 +11,16 @@ def load_model():
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(model_name, quantization_config = bnb_congif, device_map={"":0})
     return tokenizer, model
-
 # Load the model and tokenizer
 tokenizer, model = load_model()
-# Function to generate text based on the user prompt
-def generate_response(prompt, max_length=1000):
+def generate_response(prompt, max_new_tokens=1000):
     # Tokenize input prompt
     inputs = tokenizer(prompt, return_tensors="pt")
     # Generate response using the model
-    output = model.generate(inputs.input_ids, min_length=100, max_length=max_length, num_return_sequences=1)
+    output = model.generate(inputs.input_ids, min_length=100, max_new_tokens=max_new_tokens, num_return_sequences=1)
     # Decode the response and return
     return tokenizer.decode(output[0], skip_special_tokens=True)
+
 
 # Streamlit App
 def main():
