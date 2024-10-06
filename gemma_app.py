@@ -1,70 +1,57 @@
 import streamlit as st
-from unsloth import FastLanguageModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
-from transformers import TextStreamer
 
-# Set parameters for model loading
-max_seq_length = 2048  # Choose any! We auto support RoPE Scaling internally!
-dtype = None  # None for auto detection; Float16 for Tesla T4, V100, Bfloat16 for Ampere+
-load_in_4bit = True  # Use 4bit quantization to reduce memory usage
+# Title and Description for the App
+st.title("Cybersecurity Fine-Tuned Model Inference")
+st.write("This app uses a fine-tuned 'Gemma-2-2b-it' model for cybersecurity-related text generation.")
 
-# Cache the model loading to avoid reloading it on every interaction
+# Load Model and Tokenizer from Hugging Face
 @st.cache_resource
 def load_model():
-    model_name = "google/gemma-2-2b-it"  # Replace with your Hugging Face repo or local path
-    model, tokenizer = FastLanguageModel.from_pretrained(
-        model_name=model_name,
-        max_seq_length=max_seq_length,
-        dtype=dtype,
-        load_in_4bit=load_in_4bit,
-    )
+    model_name = "s0uL141/Cyber_gemma2_2B_it"  # Your fine-tuned model
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")
     return model, tokenizer
 
 # Load the model and tokenizer
 model, tokenizer = load_model()
 
-# Enable native 2x faster inference
-FastLanguageModel.for_inference(model)
+# Function to generate text
+def generate_text(prompt, max_length=500):
+    inputs = tokenizer([prompt], return_tensors="pt").to("cuda")
+    outputs = model.generate(
+        inputs.input_ids, 
+        max_length=max_length, 
+        num_return_sequences=1, 
+        do_sample=True,
+        temperature=0.7,  # Control the creativity
+    )
+    generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return generated_text
 
-def generate_response(prompt, max_new_tokens=500):
-    # Prepare the input prompt
-    inputs = tokenizer(
-        [
-            prompt.format(
-                "What is cyber security?",  # input
-                "",  # output - leave this blank for generation!
-            )
-        ], return_tensors="pt").to("cuda")  # Use GPU for faster processing
-
-    # Generate response using the model
-    text_streamer = TextStreamer(tokenizer)  # Stream the output as it generates
-    output = model.generate(**inputs, streamer=text_streamer, max_new_tokens=max_new_tokens)
-
-    # Decode the generated output and return
-    return tokenizer.decode(output[0], skip_special_tokens=True)
-
-# Streamlit App
+# Main function to run the app
 def main():
-    # Set up the title and description for the app
-    st.title("Fine-Tuned Gemma Model")
-    st.write("This app generates responses based on your input using a fine-tuned version of the Gemma model.")
+    # Create a text input for the user to enter a prompt
+    st.write("Enter your cybersecurity-related prompt below:")
+    user_prompt = st.text_area("Prompt", "What is cyber security?", height=100)
 
-    # Text input area for the user to provide a prompt
-    user_input = st.text_area("Enter your prompt here:", height=100)
-
-    # Button to trigger text generation
+    # When the user clicks the button, generate the response
     if st.button("Generate Response"):
-        # Check if user input is provided
-        if user_input.strip() == "":
-            st.write("Please enter a valid prompt.")
-        else:
+        if user_prompt.strip() != "":
             with st.spinner("Generating response..."):
-                # Generate response using the model
-                response = generate_response(user_input)
-                # Display the generated response
-                st.write("### Model Response:")
+                response = generate_text(user_prompt)
+                st.write("### Generated Response:")
                 st.write(response)
+        else:
+            st.write("Please enter a valid prompt.")
 
-# Entry point to run the app
+    # Additional option to control the max length of generated text
+    max_length = st.slider("Max Length of Response", min_value=50, max_value=1000, value=500)
+
+    # Footer
+    st.write("Fine-tuned model hosted on Hugging Face: [Cyber_gemma2_2B_it](https://huggingface.co/s0uL141/Cyber_gemma2_2B_it)")
+
+# Ensure the script runs directly
 if __name__ == "__main__":
     main()
